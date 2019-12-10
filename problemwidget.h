@@ -17,6 +17,7 @@ public slots:
     void updateTask(const Problem& problem);
     void updateSolution(const Problem& problem);
     void updateProblem(const Problem& problem);
+    void updateProblem();
 
 private:
     QTextEdit *textEditTask;

@@ -28,3 +28,9 @@ void ProblemWidget::updateProblem(const Problem &problem)
     updateTask(problem);
     updateSolution(problem);
 }
+
+void ProblemWidget::updateProblem()
+{
+    textEditTask->clear();
+    textEditSolution->clear();
+}

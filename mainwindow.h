@@ -15,7 +15,10 @@ public:
     ~MainWindow();
 
 private slots:
-    void updateProblem(int currentRow);
+    void showContextMenu(const QPoint & pos);
+    void renameItem();
+    void deleteItem();
+    void problemSelectionChanged();
 
 private:
     QList<Problem> problems;
