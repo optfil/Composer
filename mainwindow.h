@@ -14,6 +14,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void updateProblem(int currentRow);
+
 private:
     QList<Problem> problems;
 

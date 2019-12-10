@@ -39,10 +39,19 @@ MainWindow::MainWindow(QWidget *parent)
     connect(actionQuit, &QAction::triggered, this, &MainWindow::close);
     QMenu * menuFile = menuBar()->addMenu(tr("&File"));
     menuFile->addAction(actionQuit);
+
+    connect(listWidgetProblems, &QListWidget::currentRowChanged, this, &MainWindow::updateProblem);
 }
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::updateProblem(int currentRow)
+{
+    QListWidgetItem * item = listWidgetProblems->item(currentRow);
+    const Problem & problem = item->data(Qt::UserRole).value<Problem>();
+    problemWidget->updateProblem(problem);
 }
 
 void MainWindow::mock_create_problems()
