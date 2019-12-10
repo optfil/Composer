@@ -12,6 +12,7 @@ public:
 
     void setTask(const QString & task) {task_ = task;}
     void setSolution(const QString & solution) {solution_ = solution;}
+    QString name() const {return name_;}
     QString task() const {return task_;}
     QString solution() const {return solution_;}
 
