@@ -6,7 +6,9 @@
 class Problem
 {
 public:
-    Problem() {}
+    Problem(const QString & name)
+        : name_{name}, task_{}, solution_{}
+    {}
 
     void setTask(const QString & task) {task_ = task;}
     void setSolution(const QString & solution) {solution_ = solution;}
@@ -14,6 +16,7 @@ public:
     QString solution() const {return solution_;}
 
 private:
+    QString name_;
     QString task_;
     QString solution_;
 };
