@@ -54,12 +54,10 @@ void MainWindow::showContextMenu(const QPoint &pos)
 {
     QPoint globalPos = listWidgetProblems->mapToGlobal(pos);
 
-    // Create menu and insert some actions
     QMenu myMenu;
     myMenu.addAction("Rename", this, &MainWindow::renameItem);
     myMenu.addAction("Delete", this, &MainWindow::deleteItem);
 
-    // Show context menu at handling position
     myMenu.exec(globalPos);
 }
 
