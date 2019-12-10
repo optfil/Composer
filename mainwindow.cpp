@@ -13,10 +13,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     problemWidget = new ProblemWidget;
     listWidgetProblems = new QListWidget;
+    listWidgetProblems->setSelectionMode(QAbstractItemView::SingleSelection);
 
     QHBoxLayout * layoutMain = new QHBoxLayout;
     layoutMain->addWidget(listWidgetProblems);
     layoutMain->addWidget(problemWidget);
+
+    for (const auto &problem: problems){
+        QListWidgetItem * item = new QListWidgetItem;
+        item->setData(Qt::UserRole, QVariant::fromValue(problem));
+        item->setText(problem.name());
+        listWidgetProblems->addItem(item);
+    }
 
     widgetCentral->setLayout(layoutMain);
     statusBar();  // needed to create status bar
@@ -31,8 +39,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(actionQuit, &QAction::triggered, this, &MainWindow::close);
     QMenu * menuFile = menuBar()->addMenu(tr("&File"));
     menuFile->addAction(actionQuit);
-
-    problemWidget->updateProblem(problems[0]);
 }
 
 MainWindow::~MainWindow()
