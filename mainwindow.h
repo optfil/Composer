@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "problem.h"
 
 class MainWindow : public QMainWindow
 {
@@ -10,5 +11,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+private:
+    Problem problem;
 };
 #endif // MAINWINDOW_H
