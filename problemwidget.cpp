@@ -12,3 +12,19 @@ ProblemWidget::ProblemWidget(QWidget *parent) : QWidget(parent)
 
     setLayout(layoutMain);
 }
+
+void ProblemWidget::updateTask(const Problem &problem)
+{
+    textEditTask->setText(problem.task());
+}
+
+void ProblemWidget::updateSolution(const Problem &problem)
+{
+    textEditSolution->setText(problem.solution());
+}
+
+void ProblemWidget::updateProblem(const Problem &problem)
+{
+    updateTask(problem);
+    updateSolution(problem);
+}

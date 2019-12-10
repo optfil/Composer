@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "problem.h"
+#include "problemwidget.h"
 
 class MainWindow : public QMainWindow
 {
@@ -14,5 +15,8 @@ public:
 
 private:
     Problem problem;
+
+    ProblemWidget * problemWidget;
 };
+
 #endif // MAINWINDOW_H

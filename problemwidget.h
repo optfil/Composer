@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTextEdit>
+#include "problem.h"
 
 class ProblemWidget : public QWidget
 {
@@ -13,6 +14,9 @@ public:
 signals:
 
 public slots:
+    void updateTask(const Problem& problem);
+    void updateSolution(const Problem& problem);
+    void updateProblem(const Problem& problem);
 
 private:
     QTextEdit *textEditTask;
