@@ -14,9 +14,11 @@ public:
     ~MainWindow();
 
 private:
-    Problem problem;
+    QList<Problem> problems;
 
     ProblemWidget * problemWidget;
+
+    void mock_create_problems();  // psst, need some problems?
 };
 
 #endif // MAINWINDOW_H

@@ -6,7 +6,7 @@
 class Problem
 {
 public:
-    Problem(const QString & name)
+    explicit Problem(const QString & name)
         : name_{name}, task_{}, solution_{}
     {}
 

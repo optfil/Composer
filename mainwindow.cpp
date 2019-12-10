@@ -6,8 +6,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    problem.setTask("Условие");
-    problem.setSolution("Решение");
+    mock_create_problems();
 
     QWidget * widgetCentral = new QWidget;
     setCentralWidget(widgetCentral);
@@ -31,10 +30,28 @@ MainWindow::MainWindow(QWidget *parent)
     QMenu * menuFile = menuBar()->addMenu(tr("&File"));
     menuFile->addAction(actionQuit);
 
-    problemWidget->updateProblem(problem);
+    problemWidget->updateProblem(problems[0]);
 }
 
 MainWindow::~MainWindow()
 {
 }
 
+void MainWindow::mock_create_problems()
+{
+    problems.append(Problem("Задача про колесо"));
+    problems.last().setTask("Колесо катится без проскальзывания. Найти его скорость.");
+    problems.last().setSolution("Скорость равна 2 м/с.");
+
+    problems.append(Problem("Задача про уробороса"));
+    problems.last().setTask("Уроборос плотно пообедал. Кого он съел?");
+    problems.last().setSolution("Свой хвост, очевидно.");
+
+    problems.append(Problem("Сопротивление бесполезно!"));
+    problems.last().setTask("На рисунке изображена схема. Найти ее.");
+    problems.last().setSolution("404: схема не найдена. (Это шутка, а не реальный ответ БД)");
+
+    problems.append(Problem("Вечный вопрос"));
+    problems.last().setTask("Любит ли меня жена?");
+    problems.last().setSolution("Чья?");
+}
