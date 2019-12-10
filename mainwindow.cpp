@@ -2,6 +2,7 @@
 #include <QLayout>
 #include <QStatusBar>
 #include <QMenuBar>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -53,12 +54,19 @@ MainWindow::~MainWindow()
 void MainWindow::showContextMenu(const QPoint &pos)
 {
     QPoint globalPos = listWidgetProblems->mapToGlobal(pos);
+    QListWidgetItem * item = listWidgetProblems->itemAt(pos);
 
-    QMenu myMenu;
-    myMenu.addAction("Rename", this, &MainWindow::renameItem);
-    myMenu.addAction("Delete", this, &MainWindow::deleteItem);
+    QMenu menu;
+    menu.addAction("New", this, &MainWindow::newItem);
+    menu.addAction("Rename", this, &MainWindow::renameItem)->setEnabled(static_cast<bool>(item));
+    menu.addAction("Delete", this, &MainWindow::deleteItem)->setEnabled(static_cast<bool>(item));
 
-    myMenu.exec(globalPos);
+    menu.exec(globalPos);
+}
+
+void MainWindow::newItem()
+{
+
 }
 
 void MainWindow::renameItem()

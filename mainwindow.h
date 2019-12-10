@@ -16,6 +16,7 @@ public:
 
 private slots:
     void showContextMenu(const QPoint & pos);
+    void newItem();
     void renameItem();
     void deleteItem();
     void problemSelectionChanged();
