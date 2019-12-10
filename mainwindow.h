@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QListWidget>
 #include "problem.h"
 #include "problemwidget.h"
 
@@ -16,6 +17,7 @@ public:
 private:
     QList<Problem> problems;
 
+    QListWidget * listWidgetProblems;
     ProblemWidget * problemWidget;
 
     void mock_create_problems();  // psst, need some problems?

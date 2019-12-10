@@ -12,8 +12,10 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(widgetCentral);
 
     problemWidget = new ProblemWidget;
+    listWidgetProblems = new QListWidget;
 
     QHBoxLayout * layoutMain = new QHBoxLayout;
+    layoutMain->addWidget(listWidgetProblems);
     layoutMain->addWidget(problemWidget);
 
     widgetCentral->setLayout(layoutMain);
