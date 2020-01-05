@@ -3,10 +3,49 @@
 #include <QStatusBar>
 #include <QMenuBar>
 #include <QDebug>
+#include <QMessageBox>
+
+constexpr char dataBaseName[] = "MyDataBase";
+constexpr char dataBaseFileName[] = "database.sdb";
+
+void queryDebug(QSqlQuery * query, const QString& str)
+{
+    if (!query->exec(str))
+        qDebug() << str << " failed; " << query->lastError().text();
+}
+
+bool initDb(QSqlDatabase * db)
+{
+    QSqlQuery query("", *db);
+
+    if (!db->tables().contains("problems"))
+    {
+        queryDebug(&query, "create table problems (id int primary key, name text, task text, solution text)");
+        queryDebug(&query, "insert into problems values(0, 'Задача про колесо', 'Колесо катится без проскальзывания. Найти его скорость.', 'Скорость равна 2 м/с.')");
+        queryDebug(&query, "insert into problems values(1, 'Задача про уробороса', 'Уроборос плотно пообедал. Кого он съел?', 'Свой хвост, очевидно.')");
+        queryDebug(&query, "insert into problems values(2, 'Сопротивление бесполезно!', 'На рисунке изображена схема. Найти ее.', '404: схема не найдена. (Это шутка, а не реальный ответ БД)')");
+        queryDebug(&query, "insert into problems values(3, 'Вечный вопрос', 'Любит ли меня жена?', 'Чья?')");
+    }
+
+    return true;
+}
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), queryModel(nullptr)
 {
+    db = new QSqlDatabase{QSqlDatabase::addDatabase("QSQLITE", dataBaseName)};
+    db->setDatabaseName(dataBaseFileName);
+    if (!db->open())
+        QMessageBox::critical(nullptr, QObject::tr("Cannot open database"),
+            QObject::tr("Unable to establish a database connection.\n"
+                        "This example needs SQLite support. Please read "
+                        "the Qt SQL driver documentation for information how "
+                        "to build it.\n\n"
+                        "Click Cancel to exit."), QMessageBox::Cancel);
+    //if (db->tables().empty())
+    //    initDb(db);
+
+
     mock_create_problems();
 
     QWidget * widgetCentral = new QWidget;
@@ -49,6 +88,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    delete queryModel;
+    delete db;
+    QSqlDatabase::removeDatabase(dataBaseName);
 }
 
 void MainWindow::showContextMenu(const QPoint &pos)

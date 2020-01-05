@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QListWidget>
+#include <QtSql>
+
 #include "problem.h"
 #include "problemwidget.h"
 
@@ -26,6 +28,9 @@ private:
 
     QListWidget * listWidgetProblems;
     ProblemWidget * problemWidget;
+
+    QSqlTableModel *queryModel;
+    QSqlDatabase *db;
 
     void mock_create_problems();  // psst, need some problems?
 };
