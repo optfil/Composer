@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QListWidget>
+#include <QListView>
 #include <QtSql>
 
 #include "problem.h"
@@ -26,7 +26,7 @@ private slots:
 private:
     QList<Problem> problems;
 
-    QListWidget * listWidgetProblems;
+    QListView* listViewProblems;
     ProblemWidget * problemWidget;
 
     QSqlTableModel *queryModel;

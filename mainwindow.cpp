@@ -46,26 +46,26 @@ MainWindow::MainWindow(QWidget *parent)
     //    initDb(db);
 
 
-    mock_create_problems();
+    // mock_create_problems();
 
     QWidget * widgetCentral = new QWidget;
     setCentralWidget(widgetCentral);
 
     problemWidget = new ProblemWidget;
-    listWidgetProblems = new QListWidget;
-    listWidgetProblems->setSelectionMode(QAbstractItemView::SingleSelection);
+    listViewProblems = new QListView;
+    listViewProblems->setSelectionMode(QAbstractItemView::SingleSelection);
 
 
     QHBoxLayout * layoutMain = new QHBoxLayout;
-    layoutMain->addWidget(listWidgetProblems);
+    layoutMain->addWidget(listViewProblems);
     layoutMain->addWidget(problemWidget);
-
+/*
     for (const auto &problem: problems){
         QListWidgetItem * item = new QListWidgetItem;
         item->setData(Qt::UserRole, QVariant::fromValue(problem));
         item->setText(problem.name());
         listWidgetProblems->addItem(item);
-    }
+    }*/
 
     widgetCentral->setLayout(layoutMain);    
     statusBar();  // needed to create status bar
@@ -81,9 +81,9 @@ MainWindow::MainWindow(QWidget *parent)
     QMenu * menuFile = menuBar()->addMenu(tr("&File"));
     menuFile->addAction(actionQuit);
 
-    listWidgetProblems->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(listWidgetProblems, &QListWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
-    connect(listWidgetProblems, &QListWidget::itemSelectionChanged, this, &MainWindow::problemSelectionChanged);
+    listViewProblems->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(listViewProblems, &QListView::customContextMenuRequested, this, &MainWindow::showContextMenu);
+    //connect(listViewProblems, &QListView::itemSelectionChanged, this, &MainWindow::problemSelectionChanged);
 }
 
 MainWindow::~MainWindow()
@@ -94,7 +94,7 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::showContextMenu(const QPoint &pos)
-{
+{/*
     QPoint globalPos = listWidgetProblems->mapToGlobal(pos);
     QListWidgetItem * item = listWidgetProblems->itemAt(pos);
 
@@ -103,7 +103,7 @@ void MainWindow::showContextMenu(const QPoint &pos)
     menu.addAction("Rename", this, &MainWindow::renameItem)->setEnabled(static_cast<bool>(item));
     menu.addAction("Delete", this, &MainWindow::deleteItem)->setEnabled(static_cast<bool>(item));
 
-    menu.exec(globalPos);
+    menu.exec(globalPos);*/
 }
 
 void MainWindow::newItem()
@@ -112,28 +112,28 @@ void MainWindow::newItem()
 }
 
 void MainWindow::renameItem()
-{
+{/*
     QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
     if (!selectedItems.empty())
     {
         QListWidgetItem *item = selectedItems.first();
         item->setFlags(item->flags() | Qt::ItemIsEditable);
         listWidgetProblems->editItem(item);
-    }
+    }*/
 }
 
 void MainWindow::deleteItem()
-{
+{/*
     QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
     if (!selectedItems.empty())
     {
         QListWidgetItem * item = listWidgetProblems->takeItem(listWidgetProblems->currentRow());
         delete item;
-    }
+    }*/
 }
 
 void MainWindow::problemSelectionChanged()
-{
+{/*
     QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
     if (!selectedItems.empty())
     {
@@ -143,7 +143,7 @@ void MainWindow::problemSelectionChanged()
         problemWidget->updateProblem(problem);
     }
     else
-        problemWidget->updateProblem();
+        problemWidget->updateProblem();*/
 }
 
 void MainWindow::mock_create_problems()
