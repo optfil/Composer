@@ -90,16 +90,15 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::showContextMenu(const QPoint &pos)
-{/*
-    QPoint globalPos = listWidgetProblems->mapToGlobal(pos);
-    QListWidgetItem * item = listWidgetProblems->itemAt(pos);
+{
+    QModelIndex index = listViewProblems->indexAt(pos);
 
     QMenu menu;
     menu.addAction("New", this, &MainWindow::newItem);
-    menu.addAction("Rename", this, &MainWindow::renameItem)->setEnabled(static_cast<bool>(item));
-    menu.addAction("Delete", this, &MainWindow::deleteItem)->setEnabled(static_cast<bool>(item));
+    menu.addAction("Rename", this, &MainWindow::renameItem)->setEnabled(index.isValid());
+    menu.addAction("Delete", this, &MainWindow::deleteItem)->setEnabled(index.isValid());
 
-    menu.exec(globalPos);*/
+    menu.exec(listViewProblems->mapToGlobal(pos));
 }
 
 void MainWindow::newItem()
