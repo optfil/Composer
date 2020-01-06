@@ -8,6 +8,12 @@
 constexpr char dataBaseName[] = "MyDataBase";
 constexpr char dataBaseFileName[] = "database.sdb";
 
+void queryDebug(QSqlQuery * query)
+{
+    if (!query->exec())
+        qDebug() << query->lastQuery() << " failed; " << query->lastError().text();
+}
+
 void queryDebug(QSqlQuery * query, const QString& str)
 {
     if (!query->exec(str))
@@ -47,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QStringList problemNames;
     QSqlQuery query("", *db);
-    queryDebug(&query, "select name from problems;");
+    queryDebug(&query, "select name from problems");
     while (query.next())
         problemNames << query.record().value(0).toString();
     problemNamesModel = new QStringListModel(problemNames);
@@ -80,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     listViewProblems->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(listViewProblems, &QListView::customContextMenuRequested, this, &MainWindow::showContextMenu);
-    //connect(listViewProblems, &QListView::itemSelectionChanged, this, &MainWindow::problemSelectionChanged);
+    connect(listViewProblems->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::problemSelectionChanged);
 }
 
 MainWindow::~MainWindow()
@@ -136,16 +142,38 @@ void MainWindow::deleteProblem()
     }*/
 }
 
-void MainWindow::problemSelectionChanged()
-{/*
-    QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
-    if (!selectedItems.empty())
+void MainWindow::problemSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+{
+    if (previous.isValid())
     {
-        QListWidgetItem * item = selectedItems.first();
-        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-        const Problem & problem = item->data(Qt::UserRole).value<Problem>();
-        problemWidget->updateProblem(problem);
+        QSqlQuery query("", *db);
+        query.prepare(QString("update problems set task = '%1', solution = '%2' where name = '%3'")
+                      .arg(problemWidget->task())
+                      .arg(problemWidget->solution())
+                      .arg(previous.data().toString()));
+        queryDebug(&query);
+    }
+
+    if (current.isValid())
+    {
+        QSqlQuery query("", *db);
+        query.prepare(QString("select task,solution from problems where name = '%1'")
+                      .arg(current.data().toString()));
+        queryDebug(&query);
+
+        if (!query.next())  // cannot happened
+            problemWidget->updateProblem();
+        else
+        {
+            QSqlRecord record = query.record();
+            problemWidget->updateProblem(record.value(0).toString(), record.value(1).toString());
+        }
     }
     else
-        problemWidget->updateProblem();*/
+        problemWidget->updateProblem();
+
+    /*
+        QListWidgetItem * item = selectedItems.first();
+        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    */
 }

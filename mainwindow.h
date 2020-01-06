@@ -21,7 +21,7 @@ private slots:
     void newProblem();
     void renameProblem();
     void deleteProblem();
-    void problemSelectionChanged();
+    void problemSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
 
 private:
     //QList<Problem> problems;
