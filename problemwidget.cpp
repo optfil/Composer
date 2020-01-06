@@ -13,24 +13,34 @@ ProblemWidget::ProblemWidget(QWidget *parent) : QWidget(parent)
     setLayout(layoutMain);
 }
 
-void ProblemWidget::updateTask(const Problem &problem)
+void ProblemWidget::updateTask(const QString &task)
 {
-    textEditTask->setText(problem.task());
+    textEditTask->setPlainText(task);
 }
 
-void ProblemWidget::updateSolution(const Problem &problem)
+void ProblemWidget::updateSolution(const QString &solution)
 {
-    textEditSolution->setText(problem.solution());
+    textEditSolution->setPlainText(solution);
 }
 
-void ProblemWidget::updateProblem(const Problem &problem)
+void ProblemWidget::updateProblem(const QString &task, const QString &solution)
 {
-    updateTask(problem);
-    updateSolution(problem);
+    updateTask(task);
+    updateSolution(solution);
 }
 
 void ProblemWidget::updateProblem()
 {
     textEditTask->clear();
     textEditSolution->clear();
+}
+
+QString ProblemWidget::task() const
+{
+    return textEditTask->toPlainText();
+}
+
+QString ProblemWidget::solution() const
+{
+    return textEditSolution->toPlainText();
 }
