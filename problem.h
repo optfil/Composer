@@ -10,6 +10,9 @@ public:
     explicit Problem(const QString & name = "")
         : name_{name}, task_{}, solution_{}
     {}
+    explicit Problem(const QString & name, const QString & task, const QString & solution)
+        : name_{name}, task_{task}, solution_{solution}
+    {}
     Problem(const Problem & problem) = default;
     ~Problem() = default;
 
