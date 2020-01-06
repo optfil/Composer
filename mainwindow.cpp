@@ -65,15 +65,15 @@ MainWindow::MainWindow(QWidget *parent)
     layoutMain->addWidget(problemWidget);
 
     widgetCentral->setLayout(layoutMain);    
-    statusBar();  // needed to create status bar
+//    statusBar();  // needed to create status bar
 //    statusBar()->showMessage("message here");
 //    setWindowTitle("Composer 0.1");
 //    setMinimumSize(300, 300);
 //    resize(480, 320);
 
     QAction * actionQuit = new QAction(tr("&Quit"), this);
-//    actionQuit->setShortcuts(QKeySequence::New);
-    actionQuit->setStatusTip(tr("Close application"));
+    actionQuit->setShortcuts(QKeySequence::Quit);  // not for Windows, alas
+//    actionQuit->setStatusTip(tr("Close application"));
     connect(actionQuit, &QAction::triggered, this, &MainWindow::close);
     QMenu * menuFile = menuBar()->addMenu(tr("&File"));
     menuFile->addAction(actionQuit);
@@ -93,12 +93,21 @@ void MainWindow::showContextMenu(const QPoint &pos)
 {
     QModelIndex index = listViewProblems->indexAt(pos);
 
-    QMenu menu;
-    menu.addAction("New", this, &MainWindow::newItem);
-    menu.addAction("Rename", this, &MainWindow::renameItem)->setEnabled(index.isValid());
-    menu.addAction("Delete", this, &MainWindow::deleteItem)->setEnabled(index.isValid());
+    QMenu contextMenu;
+    QAction * action;
+    action = contextMenu.addAction("New", this, &MainWindow::newItem);
+    action->setToolTip("Create new problem");
+    action = contextMenu.addAction("Rename", this, &MainWindow::renameItem);
+    if (index.isValid())
+        action->setToolTip("Rename the problem");
+    action->setEnabled(index.isValid());
+    action = contextMenu.addAction("Delete", this, &MainWindow::deleteItem);
+    if (index.isValid())
+        action->setToolTip("Delete the problem");
+    action->setEnabled(index.isValid());
 
-    menu.exec(listViewProblems->mapToGlobal(pos));
+    contextMenu.setToolTipsVisible(true);
+    contextMenu.exec(listViewProblems->mapToGlobal(pos));
 }
 
 void MainWindow::newItem()
