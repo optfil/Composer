@@ -95,13 +95,13 @@ void MainWindow::showContextMenu(const QPoint &pos)
 
     QMenu contextMenu;
     QAction * action;
-    action = contextMenu.addAction("New", this, &MainWindow::newItem);
+    action = contextMenu.addAction("New", this, &MainWindow::newProblem);
     action->setToolTip("Create new problem");
-    action = contextMenu.addAction("Rename", this, &MainWindow::renameItem);
+    action = contextMenu.addAction("Rename", this, &MainWindow::renameProblem);
     if (index.isValid())
         action->setToolTip("Rename the problem");
     action->setEnabled(index.isValid());
-    action = contextMenu.addAction("Delete", this, &MainWindow::deleteItem);
+    action = contextMenu.addAction("Delete", this, &MainWindow::deleteProblem);
     if (index.isValid())
         action->setToolTip("Delete the problem");
     action->setEnabled(index.isValid());
@@ -110,12 +110,12 @@ void MainWindow::showContextMenu(const QPoint &pos)
     contextMenu.exec(listViewProblems->mapToGlobal(pos));
 }
 
-void MainWindow::newItem()
+void MainWindow::newProblem()
 {
 
 }
 
-void MainWindow::renameItem()
+void MainWindow::renameProblem()
 {/*
     QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
     if (!selectedItems.empty())
@@ -126,7 +126,7 @@ void MainWindow::renameItem()
     }*/
 }
 
-void MainWindow::deleteItem()
+void MainWindow::deleteProblem()
 {/*
     QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
     if (!selectedItems.empty())
