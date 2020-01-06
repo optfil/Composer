@@ -24,15 +24,13 @@ private slots:
     void problemSelectionChanged();
 
 private:
-    QList<Problem> problems;
+    //QList<Problem> problems;
 
-    QListView* listViewProblems;
-    ProblemWidget * problemWidget;
+    QListView *listViewProblems;
+    ProblemWidget *problemWidget;
 
-    QSqlTableModel *queryModel;
+    QStringListModel *problemNamesModel;
     QSqlDatabase *db;
-
-    void mock_create_problems();  // psst, need some problems?
 };
 
 #endif // MAINWINDOW_H

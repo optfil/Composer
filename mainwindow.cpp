@@ -31,7 +31,7 @@ bool initDb(QSqlDatabase * db)
 }
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), queryModel(nullptr)
+    : QMainWindow(parent)
 {
     db = new QSqlDatabase{QSqlDatabase::addDatabase("QSQLITE", dataBaseName)};
     db->setDatabaseName(dataBaseFileName);
@@ -42,11 +42,15 @@ MainWindow::MainWindow(QWidget *parent)
                         "the Qt SQL driver documentation for information how "
                         "to build it.\n\n"
                         "Click Cancel to exit."), QMessageBox::Cancel);
-    //if (db->tables().empty())
-    //    initDb(db);
+    if (db->tables().empty())
+        initDb(db);
 
-
-    // mock_create_problems();
+    QStringList problemNames;
+    QSqlQuery query("", *db);
+    queryDebug(&query, "select name from problems;");
+    while (query.next())
+        problemNames << query.record().value(0).toString();
+    problemNamesModel = new QStringListModel(problemNames);
 
     QWidget * widgetCentral = new QWidget;
     setCentralWidget(widgetCentral);
@@ -54,18 +58,11 @@ MainWindow::MainWindow(QWidget *parent)
     problemWidget = new ProblemWidget;
     listViewProblems = new QListView;
     listViewProblems->setSelectionMode(QAbstractItemView::SingleSelection);
-
+    listViewProblems->setModel(problemNamesModel);
 
     QHBoxLayout * layoutMain = new QHBoxLayout;
     layoutMain->addWidget(listViewProblems);
     layoutMain->addWidget(problemWidget);
-/*
-    for (const auto &problem: problems){
-        QListWidgetItem * item = new QListWidgetItem;
-        item->setData(Qt::UserRole, QVariant::fromValue(problem));
-        item->setText(problem.name());
-        listWidgetProblems->addItem(item);
-    }*/
 
     widgetCentral->setLayout(layoutMain);    
     statusBar();  // needed to create status bar
@@ -88,7 +85,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete queryModel;
     delete db;
     QSqlDatabase::removeDatabase(dataBaseName);
 }
@@ -144,23 +140,4 @@ void MainWindow::problemSelectionChanged()
     }
     else
         problemWidget->updateProblem();*/
-}
-
-void MainWindow::mock_create_problems()
-{
-    problems.append(Problem("Задача про колесо"));
-    problems.last().setTask("Колесо катится без проскальзывания. Найти его скорость.");
-    problems.last().setSolution("Скорость равна 2 м/с.");
-
-    problems.append(Problem("Задача про уробороса"));
-    problems.last().setTask("Уроборос плотно пообедал. Кого он съел?");
-    problems.last().setSolution("Свой хвост, очевидно.");
-
-    problems.append(Problem("Сопротивление бесполезно!"));
-    problems.last().setTask("На рисунке изображена схема. Найти ее.");
-    problems.last().setSolution("404: схема не найдена. (Это шутка, а не реальный ответ БД)");
-
-    problems.append(Problem("Вечный вопрос"));
-    problems.last().setTask("Любит ли меня жена?");
-    problems.last().setSolution("Чья?");
 }
