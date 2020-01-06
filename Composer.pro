@@ -22,7 +22,6 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
-    problem.h \
     problemwidget.h
 
 # Default rules for deployment.
