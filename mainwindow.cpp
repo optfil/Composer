@@ -116,7 +116,12 @@ void MainWindow::newProblem()
 
 void MainWindow::renameProblem()
 {
+    QModelIndexList selected = listViewProblems->selectionModel()->selectedIndexes();
+    if (selected.empty())  // cannot happen
+        return;
 
+
+    //listViewProblems->setEditTriggers(QAbstractItemView::)
 
     /*
     QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
@@ -135,7 +140,7 @@ void MainWindow::deleteProblem()
         return;
 
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, tr("Delete problem"), tr("Do you really want to delete problem") + selected[0].data().toString(), QMessageBox::Yes | QMessageBox::No);
+    reply = QMessageBox::question(this, tr("Delete problem"), tr("Do you really want to delete problem \"%1\" ?").arg(selected[0].data().toString()), QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes)
     {
         QSqlQuery query("", *db);
