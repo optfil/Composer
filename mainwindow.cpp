@@ -120,6 +120,9 @@ void MainWindow::renameProblem()
     if (selected.empty())  // cannot happen
         return;
 
+    old_problem_name_ = listViewProblems->model()->data(selected[0]).toString();
+    listViewProblems->edit(selected[0]);
+
 
     //listViewProblems->setEditTriggers(QAbstractItemView::)
 
@@ -205,5 +208,17 @@ void MainWindow::reloadData()
     delete sm;
 
     connect(listViewProblems->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::problemSelectionChanged);
+    connect(listViewProblems->model(), &QAbstractItemModel::dataChanged, this, &MainWindow::updateProblemNames);
     problemWidget->updateProblem();
+}
+
+void MainWindow::updateProblemNames(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+{
+    QString new_name(listViewProblems->model()->data(topLeft).toString());
+
+    QSqlQuery query("", *db);
+    query.prepare(QString("update problems set name = '%1' where name = '%2'")
+                  .arg(new_name)
+                  .arg(old_problem_name_));
+    queryDebug(&query);
 }

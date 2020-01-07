@@ -22,12 +22,15 @@ private slots:
     void deleteProblem();
     void problemSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void reloadData();
+    void updateProblemNames(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
 private:
     QListView *listViewProblems;
     ProblemWidget *problemWidget;
 
     QSqlDatabase *db;
+
+    QString old_problem_name_;  // needed for renaming
 };
 
 #endif // MAINWINDOW_H
