@@ -5,7 +5,6 @@
 #include <QListView>
 #include <QtSql>
 
-#include "problem.h"
 #include "problemwidget.h"
 
 class MainWindow : public QMainWindow
