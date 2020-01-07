@@ -172,9 +172,4 @@ void MainWindow::problemSelectionChanged(const QModelIndex& current, const QMode
     }
     else
         problemWidget->updateProblem();
-
-    /*
-        QListWidgetItem * item = selectedItems.first();
-        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-    */
 }
