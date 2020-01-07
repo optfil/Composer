@@ -128,14 +128,19 @@ void MainWindow::renameProblem()
 void MainWindow::deleteProblem()
 {
     QModelIndexList selected = listViewProblems->selectionModel()->selectedIndexes();
-    if (selected.empty())
+    if (selected.empty())  // cannot happen
         return;
 
-    QSqlQuery query("", *db);
-    query.prepare(QString("delete from problems where name = '%1'").arg(selected[0].data().toString()));
-    queryDebug(&query);
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, tr("Delete problem"), tr("Do you really want to delete problem?"), QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes)
+    {
+        QSqlQuery query("", *db);
+        query.prepare(QString("delete from problems where name = '%1'").arg(selected[0].data().toString()));
+        queryDebug(&query);
 
-    reloadData();
+        reloadData();
+    }
 }
 
 void MainWindow::problemSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
