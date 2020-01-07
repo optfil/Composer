@@ -20,7 +20,7 @@ private slots:
     void newProblem();
     void renameProblem();
     void deleteProblem();
-    void problemSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
+    void problemSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void reloadData();
 
 private:

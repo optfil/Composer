@@ -56,15 +56,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     problemWidget = new ProblemWidget;
     listViewProblems = new QListView;
-    //listViewProblems->setSelectionMode(QAbstractItemView::SingleSelection);
     listViewProblems->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    reloadData();
 
     QHBoxLayout * layoutMain = new QHBoxLayout;
     layoutMain->addWidget(listViewProblems);
     layoutMain->addWidget(problemWidget);
 
-    widgetCentral->setLayout(layoutMain);    
+    widgetCentral->setLayout(layoutMain);
+    reloadData();
+
 //    statusBar();  // needed to create status bar
 //    statusBar()->showMessage("message here");
 //    setWindowTitle("Composer 0.1");
@@ -136,42 +136,44 @@ void MainWindow::deleteProblem()
     queryDebug(&query);
 
     reloadData();
-
-    /*
-    QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
-    if (!selectedItems.empty())
-    {
-        QListWidgetItem * item = listWidgetProblems->takeItem(listWidgetProblems->currentRow());
-        delete item;
-    }*/
 }
 
-void MainWindow::problemSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+void MainWindow::problemSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
-    if (previous.isValid())
+    if (!deselected.indexes().empty())
     {
-        QSqlQuery query("", *db);
-        query.prepare(QString("update problems set task = '%1', solution = '%2' where name = '%3'")
-                      .arg(problemWidget->task())
-                      .arg(problemWidget->solution())
-                      .arg(previous.data().toString()));
-        queryDebug(&query);
+        QModelIndex previous = deselected.indexes()[0];
+        if (previous.isValid())  // may be redundant
+        {
+            QSqlQuery query("", *db);
+            query.prepare(QString("update problems set task = '%1', solution = '%2' where name = '%3'")
+                          .arg(problemWidget->task())
+                          .arg(problemWidget->solution())
+                          .arg(previous.data().toString()));
+            queryDebug(&query);
+        }
     }
 
-    if (current.isValid())
+    if (!selected.indexes().empty())
     {
-        QSqlQuery query("", *db);
-        query.prepare(QString("select task,solution from problems where name = '%1'")
-                      .arg(current.data().toString()));
-        queryDebug(&query);
-        qDebug() << query.lastQuery();
-        if (!query.next())  // cannot happened
-            problemWidget->updateProblem();
-        else
+        QModelIndex current = selected.indexes()[0];
+        if (current.isValid())  // may be redundant
         {
-            QSqlRecord record = query.record();
-            problemWidget->updateProblem(record.value(0).toString(), record.value(1).toString());
+            QSqlQuery query("", *db);
+            query.prepare(QString("select task,solution from problems where name = '%1'")
+                          .arg(current.data().toString()));
+            queryDebug(&query);
+
+            if (!query.next())  // cannot happened
+                problemWidget->updateProblem();
+            else
+            {
+                QSqlRecord record = query.record();
+                problemWidget->updateProblem(record.value(0).toString(), record.value(1).toString());
+            }
         }
+        else
+            problemWidget->updateProblem();
     }
     else
         problemWidget->updateProblem();
@@ -185,10 +187,10 @@ void MainWindow::reloadData()
     while (query.next())
         problemNames << query.record().value(0).toString();
 
-    QItemSelectionModel *m = listViewProblems->selectionModel();
+    QItemSelectionModel *sm = listViewProblems->selectionModel();
     listViewProblems->setModel(new QStringListModel(problemNames));
-    delete m;
-    connect(listViewProblems->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::problemSelectionChanged);
+    delete sm;
 
+    connect(listViewProblems->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::problemSelectionChanged);
     problemWidget->updateProblem();
 }
