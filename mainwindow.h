@@ -23,8 +23,6 @@ private slots:
     void problemSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
 
 private:
-    //QList<Problem> problems;
-
     QListView *listViewProblems;
     ProblemWidget *problemWidget;
 
