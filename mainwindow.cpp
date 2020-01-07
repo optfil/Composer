@@ -65,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
     listViewProblems = new QListView;
     listViewProblems->setSelectionMode(QAbstractItemView::SingleSelection);
     listViewProblems->setModel(problemNamesModel);
+    listViewProblems->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     QHBoxLayout * layoutMain = new QHBoxLayout;
     layoutMain->addWidget(listViewProblems);
