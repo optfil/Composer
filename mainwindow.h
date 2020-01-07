@@ -22,7 +22,7 @@ private slots:
     void deleteProblem();
     void problemSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void reloadData();
-    void updateProblemNames(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+    void updateProblemNames(const QModelIndex& index);
 
 private:
     QListView *listViewProblems;

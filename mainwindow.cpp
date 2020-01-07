@@ -120,20 +120,8 @@ void MainWindow::renameProblem()
     if (selected.empty())  // cannot happen
         return;
 
-    old_problem_name_ = listViewProblems->model()->data(selected[0]).toString();
+    old_problem_name_ = listViewProblems->model()->data(selected[0]).toString();  // MUST save old name to pass it to 'where' case of sql update command
     listViewProblems->edit(selected[0]);
-
-
-    //listViewProblems->setEditTriggers(QAbstractItemView::)
-
-    /*
-    QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
-    if (!selectedItems.empty())
-    {
-        QListWidgetItem *item = selectedItems.first();
-        item->setFlags(item->flags() | Qt::ItemIsEditable);
-        listWidgetProblems->editItem(item);
-    }*/
 }
 
 void MainWindow::deleteProblem()
@@ -208,13 +196,13 @@ void MainWindow::reloadData()
     delete sm;
 
     connect(listViewProblems->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::problemSelectionChanged);
-    connect(listViewProblems->model(), &QAbstractItemModel::dataChanged, this, &MainWindow::updateProblemNames);
+    connect(listViewProblems->model(), &QAbstractItemModel::dataChanged, this, &MainWindow::updateProblemNames);  // only first (aka topLeft) item will be updated
     problemWidget->updateProblem();
 }
 
-void MainWindow::updateProblemNames(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+void MainWindow::updateProblemNames(const QModelIndex &index)
 {
-    QString new_name(listViewProblems->model()->data(topLeft).toString());
+    QString new_name(listViewProblems->model()->data(index).toString());
 
     QSqlQuery query("", *db);
     query.prepare(QString("update problems set name = '%1' where name = '%2'")
