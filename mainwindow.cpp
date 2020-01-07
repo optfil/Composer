@@ -111,7 +111,12 @@ void MainWindow::showContextMenu(const QPoint &pos)
 
 void MainWindow::newProblem()
 {
-
+    QAbstractItemModel *m = listViewProblems->model();
+    if (m->insertRow(m->rowCount()))
+    {
+        old_problem_name_ = "";
+        listViewProblems->edit(m->index(m->rowCount() - 1, 0));
+    }
 }
 
 void MainWindow::renameProblem()
@@ -203,6 +208,12 @@ void MainWindow::reloadData()
 void MainWindow::updateProblemNames(const QModelIndex &index)
 {
     QString new_name(listViewProblems->model()->data(index).toString());
+    if (new_name == "")
+    {
+        qDebug() << "HERE!";
+        listViewProblems->edit(index);
+        return;
+    }
 
     QSqlQuery query("", *db);
     query.prepare(QString("update problems set name = '%1' where name = '%2'")
