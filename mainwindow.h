@@ -21,12 +21,12 @@ private slots:
     void renameProblem();
     void deleteProblem();
     void problemSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
+    void reloadData();
 
 private:
     QListView *listViewProblems;
     ProblemWidget *problemWidget;
 
-    QStringListModel *problemNamesModel;
     QSqlDatabase *db;
 };
 

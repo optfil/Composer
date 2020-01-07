@@ -51,21 +51,14 @@ MainWindow::MainWindow(QWidget *parent)
     if (db->tables().empty())
         initDb(db);
 
-    QStringList problemNames;
-    QSqlQuery query("", *db);
-    queryDebug(&query, "select name from problems");
-    while (query.next())
-        problemNames << query.record().value(0).toString();
-    problemNamesModel = new QStringListModel(problemNames);
-
     QWidget * widgetCentral = new QWidget;
     setCentralWidget(widgetCentral);
 
     problemWidget = new ProblemWidget;
     listViewProblems = new QListView;
-    listViewProblems->setSelectionMode(QAbstractItemView::SingleSelection);
-    listViewProblems->setModel(problemNamesModel);
+    //listViewProblems->setSelectionMode(QAbstractItemView::SingleSelection);
     listViewProblems->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    reloadData();
 
     QHBoxLayout * layoutMain = new QHBoxLayout;
     layoutMain->addWidget(listViewProblems);
@@ -87,7 +80,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     listViewProblems->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(listViewProblems, &QListView::customContextMenuRequested, this, &MainWindow::showContextMenu);
-    connect(listViewProblems->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::problemSelectionChanged);
 }
 
 MainWindow::~MainWindow()
@@ -134,7 +126,18 @@ void MainWindow::renameProblem()
 }
 
 void MainWindow::deleteProblem()
-{/*
+{
+    QModelIndexList selected = listViewProblems->selectionModel()->selectedIndexes();
+    if (selected.empty())
+        return;
+
+    QSqlQuery query("", *db);
+    query.prepare(QString("delete from problems where name = '%1'").arg(selected[0].data().toString()));
+    queryDebug(&query);
+
+    reloadData();
+
+    /*
     QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
     if (!selectedItems.empty())
     {
@@ -161,7 +164,7 @@ void MainWindow::problemSelectionChanged(const QModelIndex& current, const QMode
         query.prepare(QString("select task,solution from problems where name = '%1'")
                       .arg(current.data().toString()));
         queryDebug(&query);
-
+        qDebug() << query.lastQuery();
         if (!query.next())  // cannot happened
             problemWidget->updateProblem();
         else
@@ -172,4 +175,20 @@ void MainWindow::problemSelectionChanged(const QModelIndex& current, const QMode
     }
     else
         problemWidget->updateProblem();
+}
+
+void MainWindow::reloadData()
+{
+    QSqlQuery query("", *db);
+    queryDebug(&query, "select name from problems");
+    QStringList problemNames;
+    while (query.next())
+        problemNames << query.record().value(0).toString();
+
+    QItemSelectionModel *m = listViewProblems->selectionModel();
+    listViewProblems->setModel(new QStringListModel(problemNames));
+    delete m;
+    connect(listViewProblems->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::problemSelectionChanged);
+
+    problemWidget->updateProblem();
 }
