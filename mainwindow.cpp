@@ -115,7 +115,10 @@ void MainWindow::newProblem()
 }
 
 void MainWindow::renameProblem()
-{/*
+{
+
+
+    /*
     QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
     if (!selectedItems.empty())
     {
@@ -132,7 +135,7 @@ void MainWindow::deleteProblem()
         return;
 
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, tr("Delete problem"), tr("Do you really want to delete problem?"), QMessageBox::Yes | QMessageBox::No);
+    reply = QMessageBox::question(this, tr("Delete problem"), tr("Do you really want to delete problem") + selected[0].data().toString(), QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes)
     {
         QSqlQuery query("", *db);

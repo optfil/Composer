@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTextEdit>
+#include <QCheckBox>
 
 class ProblemWidget : public QWidget
 {
@@ -18,11 +19,15 @@ public slots:
     void updateProblem(const QString& task, const QString& solution);
     void updateProblem();
 
+private slots:
+    void setReadOnly(bool allowed);
+
 public:
     QString task() const;
     QString solution() const;
 
 private:
+    QCheckBox *checkBoxEditable;
     QTextEdit *textEditTask;
     QTextEdit *textEditSolution;
 };

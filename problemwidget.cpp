@@ -3,12 +3,19 @@
 
 ProblemWidget::ProblemWidget(QWidget *parent) : QWidget(parent)
 {
+    checkBoxEditable = new QCheckBox(tr("Allow problem edit"));
     textEditTask = new QTextEdit;
     textEditSolution = new QTextEdit;
 
+    textEditTask->setReadOnly(true);
+    textEditSolution->setReadOnly(true);
+
     QVBoxLayout *layoutMain = new QVBoxLayout;
+    layoutMain->addWidget(checkBoxEditable);
     layoutMain->addWidget(textEditTask);
     layoutMain->addWidget(textEditSolution);
+
+    connect(checkBoxEditable, &QCheckBox::toggled, this, &ProblemWidget::setReadOnly);
 
     setLayout(layoutMain);
 }
@@ -33,6 +40,12 @@ void ProblemWidget::updateProblem()
 {
     textEditTask->clear();
     textEditSolution->clear();
+}
+
+void ProblemWidget::setReadOnly(bool allowed)
+{
+    textEditTask->setReadOnly(!allowed);
+    textEditSolution->setReadOnly(!allowed);
 }
 
 QString ProblemWidget::task() const
