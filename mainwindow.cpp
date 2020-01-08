@@ -228,7 +228,6 @@ void MainWindow::reloadData()
 void MainWindow::updateProblemNames(QListWidgetItem *item)
 {
     qDebug() << "updateProblemNames";
-    //QAbstractItemModel *m = listWidgetProblems->model();
     QString new_name(item->data(Qt::DisplayRole).toString());
 
     qDebug() << "old" << old_problem_name_;
