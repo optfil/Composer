@@ -63,7 +63,6 @@ MainWindow::MainWindow(QWidget *parent)
     layoutMain->addWidget(problemWidget);
 
     widgetCentral->setLayout(layoutMain);
-    reloadData();
 
 //    statusBar();  // needed to create status bar
 //    statusBar()->showMessage("message here");
@@ -81,7 +80,10 @@ MainWindow::MainWindow(QWidget *parent)
     listWidgetProblems->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(listWidgetProblems, &QListWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
     connect(listWidgetProblems->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::problemSelectionChanged);
-    connect(listWidgetProblems->model(), &QAbstractItemModel::dataChanged, this, &MainWindow::updateProblemNames);  // only first (aka topLeft) item will be updated
+    //connect(listWidgetProblems->model(), &QAbstractItemModel::dataChanged, this, &MainWindow::updateProblemNames);  // only first (aka topLeft) item will be updated
+    connect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);
+
+    reloadData();
 }
 
 MainWindow::~MainWindow()
@@ -124,12 +126,17 @@ void MainWindow::newProblem()
 
 void MainWindow::renameProblem()
 {
-    QModelIndexList selected = listWidgetProblems->selectionModel()->selectedIndexes();
+    qDebug() << "renaming";
+    QList<QListWidgetItem*> selected = listWidgetProblems->selectedItems();
     if (selected.empty())  // cannot happen
         return;
 
-    old_problem_name_ = selected[0].data().toString();  // MUST save old name to pass it to 'where' case of sql update command
-    listWidgetProblems->edit(selected[0]);
+    //qDebug() << listWidgetProblems->model()->flags(listWidgetProblems->selectionModel()->selectedIndexes()[0]);
+    old_problem_name_ = selected[0]->data(Qt::DisplayRole).toString();  // MUST save old name to pass it to 'where' case of sql update command
+    qDebug() << "read" << old_problem_name_;
+
+    listWidgetProblems->editItem(selected[0]);
+    qDebug() << "finalize";
 }
 
 void MainWindow::deleteProblem()
@@ -198,24 +205,35 @@ void MainWindow::problemSelectionChanged(const QItemSelection& selected, const Q
 
 void MainWindow::reloadData()
 {
+    disconnect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);
+
     QSqlQuery query("", *db);
     queryDebug(&query, "select name from problems");
 
     listWidgetProblems->clear();
     while (query.next())
+    {
         listWidgetProblems->addItem(query.record().value(0).toString());
+        QListWidgetItem *item = listWidgetProblems->item(listWidgetProblems->model()->rowCount()-1);
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
+    }
 
     problemWidget->updateProblem();
+
+    connect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);
 }
 
-void MainWindow::updateProblemNames(const QModelIndex &index)
+//void MainWindow::updateProblemNames(const QModelIndex &index)
+void MainWindow::updateProblemNames(const QListWidgetItem *item)
 {
-    QAbstractItemModel *m = listWidgetProblems->model();
-    QString new_name(m->data(index).toString());
+    qDebug() << "updating";
+    //QAbstractItemModel *m = listWidgetProblems->model();
+    QString new_name(item->data(Qt::DisplayRole).toString());
 
     qDebug() << "old" << old_problem_name_;
     qDebug() << "new" << new_name;
-    if (old_problem_name_ == "")  // new problem
+
+    /*if (old_problem_name_ == "")  // new problem
     {
         if (new_name == "")  // user error: empty name
         {
@@ -271,5 +289,5 @@ void MainWindow::updateProblemNames(const QModelIndex &index)
                           .arg(old_problem_name_));
             queryDebug(&query);
         }
-    }
+    }*/
 }
