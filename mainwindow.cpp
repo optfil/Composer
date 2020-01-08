@@ -225,7 +225,6 @@ void MainWindow::reloadData()
     connect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);
 }
 
-//void MainWindow::updateProblemNames(const QModelIndex &index)
 void MainWindow::updateProblemNames(QListWidgetItem *item)
 {
     qDebug() << "updateProblemNames";

@@ -22,7 +22,6 @@ private slots:
     void deleteProblem();
     void problemSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void reloadData();
-    //void updateProblemNames(const QModelIndex& index);
     void updateProblemNames(QListWidgetItem* item);
 
 private:
