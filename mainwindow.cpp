@@ -26,11 +26,11 @@ bool initDb(QSqlDatabase * db)
 
     if (!db->tables().contains("problems"))
     {
-        queryDebug(&query, "create table problems (id int primary key, name text, task text, solution text)");
-        queryDebug(&query, "insert into problems values(0, 'Задача про колесо', 'Колесо катится без проскальзывания. Найти его скорость.', 'Скорость равна 2 м/с.')");
-        queryDebug(&query, "insert into problems values(1, 'Задача про уробороса', 'Уроборос плотно пообедал. Кого он съел?', 'Свой хвост, очевидно.')");
-        queryDebug(&query, "insert into problems values(2, 'Сопротивление бесполезно!', 'На рисунке изображена схема. Найти ее.', '404: схема не найдена. (Это шутка, а не реальный ответ БД)')");
-        queryDebug(&query, "insert into problems values(3, 'Вечный вопрос', 'Любит ли меня жена?', 'Чья?')");
+        queryDebug(&query, "create table problems (id integer primary key autoincrement, name text, task text, solution text)");
+        queryDebug(&query, "insert into problems values(NULL, 'Задача про колесо', 'Колесо катится без проскальзывания. Найти его скорость.', 'Скорость равна 2 м/с.')");
+        queryDebug(&query, "insert into problems values(NULL, 'Задача про уробороса', 'Уроборос плотно пообедал. Кого он съел?', 'Свой хвост, очевидно.')");
+        queryDebug(&query, "insert into problems values(NULL, 'Сопротивление бесполезно!', 'На рисунке изображена схема. Найти ее.', '404: схема не найдена. (Это шутка, а не реальный ответ БД)')");
+        queryDebug(&query, "insert into problems values(NULL, 'Вечный вопрос', 'Любит ли меня жена?', 'Чья?')");
     }
 
     return true;
@@ -142,7 +142,7 @@ void MainWindow::deleteProblem()
         QSqlQuery query("", *db);
         query.prepare(QString("delete from problems where name = '%1'").arg(selected[0].data().toString()));
         queryDebug(&query);
-
+// delete one string from qstringlistmodel may be enough
         reloadData();
     }
 }
@@ -208,16 +208,35 @@ void MainWindow::reloadData()
 void MainWindow::updateProblemNames(const QModelIndex &index)
 {
     QString new_name(listViewProblems->model()->data(index).toString());
-    if (new_name == "")
-    {
-        qDebug() << "HERE!";
-        listViewProblems->edit(index);
-        return;
+    // somewhere we must check uniqueness of name
+    if (new_name == "")  // user error, empty name
+    {  //???
+        qDebug() << "HERE!" << index << index.isValid();
+        qDebug() << listViewProblems->model()->flags(index);
+        //listViewProblems->edit(index);
     }
-
-    QSqlQuery query("", *db);
-    query.prepare(QString("update problems set name = '%1' where name = '%2'")
-                  .arg(new_name)
-                  .arg(old_problem_name_));
-    queryDebug(&query);
+    else if (new_name == old_problem_name_)  // no renaming
+        return;
+    else if (listViewProblems->model()->match(index, Qt::DisplayRole, new_name, 2).size() > 1)
+    {
+        qDebug() << "collision by name" << new_name;
+        listViewProblems->edit(index);
+    }
+    else if (old_problem_name_ == "")  // new problem
+    {
+        QSqlQuery query("", *db);
+        query.prepare(QString("insert into problems values(NULL, '%1', '%2', '%3')")
+                      .arg(new_name)
+                      .arg("")
+                      .arg(""));
+        queryDebug(&query);
+    }
+    else
+    {
+        QSqlQuery query("", *db);
+        query.prepare(QString("update problems set name = '%1' where name = '%2'")
+                      .arg(new_name)
+                      .arg(old_problem_name_));
+        queryDebug(&query);
+    }
 }
