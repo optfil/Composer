@@ -226,7 +226,7 @@ void MainWindow::reloadData()
 }
 
 //void MainWindow::updateProblemNames(const QModelIndex &index)
-void MainWindow::updateProblemNames(const QListWidgetItem *item)
+void MainWindow::updateProblemNames(QListWidgetItem *item)
 {
     qDebug() << "updateProblemNames";
     //QAbstractItemModel *m = listWidgetProblems->model();
@@ -235,8 +235,8 @@ void MainWindow::updateProblemNames(const QListWidgetItem *item)
     qDebug() << "old" << old_problem_name_;
     qDebug() << "new" << new_name;
 
-    /*if (old_problem_name_ == "")  // new problem
-    {
+    if (old_problem_name_ == "")  // new problem
+    {/*
         if (new_name == "")  // user error: empty name
         {
             qDebug() << "HERE!";
@@ -265,7 +265,7 @@ void MainWindow::updateProblemNames(const QListWidgetItem *item)
             listWidgetProblems->clearSelection();
             listWidgetProblems->selectionModel()->select(index, QItemSelectionModel::Select);
             listWidgetProblems->setCurrentIndex(index);
-        }
+        }*/
     }
     else  // rename
     {
@@ -274,14 +274,14 @@ void MainWindow::updateProblemNames(const QListWidgetItem *item)
             QMessageBox::critical(nullptr, tr("Cannot rename problem"),
                                   tr("Unable to rename problem.\nProblem name must not be empty."),
                                   QMessageBox::Ok);
-            m->setData(index, old_problem_name_);  // revert renaming
+            item->setData(Qt::DisplayRole, old_problem_name_);  // revert renaming
         }
-        else if (m->match(index, Qt::DisplayRole, new_name, 2).size() > 1)  // user error: name collision
+        else if (listWidgetProblems->findItems(new_name, Qt::MatchExactly).size() > 1)  // user error: name collision
         {
             QMessageBox::critical(nullptr, tr("Cannot rename problem"),
                                   tr("Unable to rename problem.\nProblem with the name \"%1\" already exists.").arg(new_name),
                                   QMessageBox::Ok);
-            m->setData(index, old_problem_name_);  // revert renaming
+            item->setData(Qt::DisplayRole, old_problem_name_);  // revert renaming
         }
         else
         {
@@ -291,5 +291,5 @@ void MainWindow::updateProblemNames(const QListWidgetItem *item)
                           .arg(old_problem_name_));
             queryDebug(&query);
         }
-    }*/
+    }
 }
