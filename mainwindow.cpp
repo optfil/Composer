@@ -80,7 +80,6 @@ MainWindow::MainWindow(QWidget *parent)
     listWidgetProblems->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(listWidgetProblems, &QListWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
     connect(listWidgetProblems->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::problemSelectionChanged);
-    //connect(listWidgetProblems->model(), &QAbstractItemModel::dataChanged, this, &MainWindow::updateProblemNames);  // only first (aka topLeft) item will be updated
     connect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);
 
     reloadData();
@@ -115,6 +114,7 @@ void MainWindow::showContextMenu(const QPoint &pos)
 
 void MainWindow::newProblem()
 {
+    qDebug() << "newProblem";
     QAbstractItemModel *m = listWidgetProblems->model();
     if (m->insertRow(m->rowCount()))
     {
@@ -126,21 +126,18 @@ void MainWindow::newProblem()
 
 void MainWindow::renameProblem()
 {
-    qDebug() << "renaming";
+    qDebug() << "renameProblem";
     QList<QListWidgetItem*> selected = listWidgetProblems->selectedItems();
     if (selected.empty())  // cannot happen
         return;
 
-    //qDebug() << listWidgetProblems->model()->flags(listWidgetProblems->selectionModel()->selectedIndexes()[0]);
     old_problem_name_ = selected[0]->data(Qt::DisplayRole).toString();  // MUST save old name to pass it to 'where' case of sql update command
-    qDebug() << "read" << old_problem_name_;
-
     listWidgetProblems->editItem(selected[0]);
-    qDebug() << "finalize";
 }
 
 void MainWindow::deleteProblem()
 {
+    qDebug() << "deleteProblem";
     QList<QListWidgetItem*> selected = listWidgetProblems->selectedItems();
     if (selected.empty())  // cannot happen
         return;
@@ -158,12 +155,16 @@ void MainWindow::deleteProblem()
         query.prepare(QString("delete from problems where name = '%1'").arg(problem_name));
         queryDebug(&query);
 
+        // first move current item, then delete the selected one
+        // otherwise problemSelectionChanged will be called twice
+        listWidgetProblems->setCurrentItem(nullptr);
         listWidgetProblems->model()->removeRow(listWidgetProblems->row(selected[0]));
     }
 }
 
 void MainWindow::problemSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
+    qDebug() << "problemSelectionChanged";
     if (!deselected.indexes().empty())
     {
         QModelIndex previous = deselected.indexes()[0];
@@ -205,6 +206,7 @@ void MainWindow::problemSelectionChanged(const QItemSelection& selected, const Q
 
 void MainWindow::reloadData()
 {
+    qDebug() << "reloadData";
     disconnect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);
 
     QSqlQuery query("", *db);
@@ -226,7 +228,7 @@ void MainWindow::reloadData()
 //void MainWindow::updateProblemNames(const QModelIndex &index)
 void MainWindow::updateProblemNames(const QListWidgetItem *item)
 {
-    qDebug() << "updating";
+    qDebug() << "updateProblemNames";
     //QAbstractItemModel *m = listWidgetProblems->model();
     QString new_name(item->data(Qt::DisplayRole).toString());
 
