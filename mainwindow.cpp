@@ -55,11 +55,11 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(widgetCentral);
 
     problemWidget = new ProblemWidget;
-    listViewProblems = new QListView;
-    listViewProblems->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    listWidgetProblems = new QListWidget;
+    listWidgetProblems->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     QHBoxLayout * layoutMain = new QHBoxLayout;
-    layoutMain->addWidget(listViewProblems);
+    layoutMain->addWidget(listWidgetProblems);
     layoutMain->addWidget(problemWidget);
 
     widgetCentral->setLayout(layoutMain);
@@ -78,8 +78,10 @@ MainWindow::MainWindow(QWidget *parent)
     QMenu * menuFile = menuBar()->addMenu(tr("&File"));
     menuFile->addAction(actionQuit);
 
-    listViewProblems->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(listViewProblems, &QListView::customContextMenuRequested, this, &MainWindow::showContextMenu);
+    listWidgetProblems->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(listWidgetProblems, &QListWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
+    connect(listWidgetProblems->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::problemSelectionChanged);
+    connect(listWidgetProblems->model(), &QAbstractItemModel::dataChanged, this, &MainWindow::updateProblemNames);  // only first (aka topLeft) item will be updated
 }
 
 MainWindow::~MainWindow()
@@ -90,7 +92,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::showContextMenu(const QPoint &pos)
 {
-    QModelIndex index = listViewProblems->indexAt(pos);
+    QModelIndex index = listWidgetProblems->indexAt(pos);
 
     QMenu contextMenu;
     QAction * action;
@@ -106,44 +108,50 @@ void MainWindow::showContextMenu(const QPoint &pos)
     action->setEnabled(index.isValid());
 
     contextMenu.setToolTipsVisible(true);
-    contextMenu.exec(listViewProblems->mapToGlobal(pos));
+    contextMenu.exec(listWidgetProblems->mapToGlobal(pos));
 }
 
 void MainWindow::newProblem()
 {
-    QAbstractItemModel *m = listViewProblems->model();
+    QAbstractItemModel *m = listWidgetProblems->model();
     if (m->insertRow(m->rowCount()))
     {
-        old_problem_name_ = "";
-        listViewProblems->edit(m->index(m->rowCount() - 1, 0));
+        qDebug() << "add row";
+        old_problem_name_ = "";  // MUST nullify old name
+        listWidgetProblems->edit(m->index(m->rowCount() - 1, 0));
     }
 }
 
 void MainWindow::renameProblem()
 {
-    QModelIndexList selected = listViewProblems->selectionModel()->selectedIndexes();
+    QModelIndexList selected = listWidgetProblems->selectionModel()->selectedIndexes();
     if (selected.empty())  // cannot happen
         return;
 
-    old_problem_name_ = listViewProblems->model()->data(selected[0]).toString();  // MUST save old name to pass it to 'where' case of sql update command
-    listViewProblems->edit(selected[0]);
+    old_problem_name_ = selected[0].data().toString();  // MUST save old name to pass it to 'where' case of sql update command
+    listWidgetProblems->edit(selected[0]);
 }
 
 void MainWindow::deleteProblem()
 {
-    QModelIndexList selected = listViewProblems->selectionModel()->selectedIndexes();
+    QList<QListWidgetItem*> selected = listWidgetProblems->selectedItems();
     if (selected.empty())  // cannot happen
         return;
 
+    QString problem_name = selected[0]->data(Qt::DisplayRole).toString();
+
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, tr("Delete problem"), tr("Do you really want to delete problem \"%1\" ?").arg(selected[0].data().toString()), QMessageBox::Yes | QMessageBox::No);
+    reply = QMessageBox::question(this,
+                                  tr("Delete problem"),
+                                  tr("Do you really want to delete problem \"%1\" ?").arg(problem_name),
+                                  QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes)
     {
         QSqlQuery query("", *db);
-        query.prepare(QString("delete from problems where name = '%1'").arg(selected[0].data().toString()));
+        query.prepare(QString("delete from problems where name = '%1'").arg(problem_name));
         queryDebug(&query);
-// delete one string from qstringlistmodel may be enough
-        reloadData();
+
+        listWidgetProblems->model()->removeRow(listWidgetProblems->row(selected[0]));
     }
 }
 
@@ -192,51 +200,80 @@ void MainWindow::reloadData()
 {
     QSqlQuery query("", *db);
     queryDebug(&query, "select name from problems");
-    QStringList problemNames;
+    //QStringList problemNames;
+    listWidgetProblems->clear();
     while (query.next())
-        problemNames << query.record().value(0).toString();
+        listWidgetProblems->addItem(query.record().value(0).toString());
 
-    QItemSelectionModel *sm = listViewProblems->selectionModel();
-    listViewProblems->setModel(new QStringListModel(problemNames));
-    delete sm;
+    //QItemSelectionModel *sm = listWidgetProblems->selectionModel();
+    //listWidgetProblems->setModel(new QStringListModel(problemNames));
+    //delete sm;
 
-    connect(listViewProblems->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::problemSelectionChanged);
-    connect(listViewProblems->model(), &QAbstractItemModel::dataChanged, this, &MainWindow::updateProblemNames);  // only first (aka topLeft) item will be updated
     problemWidget->updateProblem();
 }
 
 void MainWindow::updateProblemNames(const QModelIndex &index)
 {
-    QString new_name(listViewProblems->model()->data(index).toString());
-    // somewhere we must check uniqueness of name
-    if (new_name == "")  // user error, empty name
-    {  //???
-        qDebug() << "HERE!" << index << index.isValid();
-        qDebug() << listViewProblems->model()->flags(index);
-        //listViewProblems->edit(index);
-    }
-    else if (new_name == old_problem_name_)  // no renaming
-        return;
-    else if (listViewProblems->model()->match(index, Qt::DisplayRole, new_name, 2).size() > 1)
+    QAbstractItemModel *m = listWidgetProblems->model();
+    QString new_name(m->data(index).toString());
+
+    qDebug() << "old" << old_problem_name_;
+    qDebug() << "new" << new_name;
+    if (old_problem_name_ == "")  // new problem
     {
-        qDebug() << "collision by name" << new_name;
-        listViewProblems->edit(index);
+        if (new_name == "")  // user error: empty name
+        {
+            qDebug() << "HERE!";
+            QMessageBox::critical(nullptr, tr("Cannot create problem"),
+                                  tr("Unable to create problem.\nProblem name must not be empty.").arg(new_name),
+                                  QMessageBox::Ok);
+            m->removeRow(index.row());
+        }
+        else if (m->match(index, Qt::DisplayRole, new_name, 2).size() > 1)  // name collision
+        {
+            QMessageBox::critical(nullptr, tr("Cannot create problem"),
+                                  tr("Unable to create problem.\nProblem with the name %1 already exists.").arg(new_name),
+                                  QMessageBox::Ok);
+            m->removeRow(index.row());
+        }
+        else  // create new problem
+        {
+            QSqlQuery query("", *db);
+            query.prepare(QString("insert into problems values(NULL, '%1', '%2', '%3')")
+                          .arg(new_name)
+                          .arg("")
+                          .arg(""));
+            queryDebug(&query);
+
+            // move focus to newly created problem
+            listWidgetProblems->clearSelection();
+            listWidgetProblems->selectionModel()->select(index, QItemSelectionModel::Select);
+            listWidgetProblems->setCurrentIndex(index);
+        }
     }
-    else if (old_problem_name_ == "")  // new problem
+    else  // rename
     {
-        QSqlQuery query("", *db);
-        query.prepare(QString("insert into problems values(NULL, '%1', '%2', '%3')")
-                      .arg(new_name)
-                      .arg("")
-                      .arg(""));
-        queryDebug(&query);
-    }
-    else
-    {
-        QSqlQuery query("", *db);
-        query.prepare(QString("update problems set name = '%1' where name = '%2'")
-                      .arg(new_name)
-                      .arg(old_problem_name_));
-        queryDebug(&query);
+        if (new_name == "")  // user error: empty name
+        {
+            QMessageBox::critical(nullptr, tr("Cannot rename problem"),
+                                  tr("Unable to rename problem.\nProblem name must not be empty."),
+                                  QMessageBox::Ok);
+            m->setData(index, old_problem_name_);  // revert renaming
+        }
+        else if (m->match(index, Qt::DisplayRole, new_name, 2).size() > 1)  // user error: name collision
+        {
+            QMessageBox::critical(nullptr, tr("Cannot rename problem"),
+                                  tr("Unable to rename problem.\nProblem with the name \"%1\" already exists.").arg(new_name),
+                                  QMessageBox::Ok);
+            m->setData(index, old_problem_name_);  // revert renaming
+        }
+        else
+        {
+            QSqlQuery query("", *db);
+            query.prepare(QString("update problems set name = '%1' where name = '%2'")
+                          .arg(new_name)
+                          .arg(old_problem_name_));
+            queryDebug(&query);
+        }
     }
 }

@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QListView>
+#include <QListWidget>
 #include <QtSql>
 
 #include "problemwidget.h"
@@ -25,7 +25,7 @@ private slots:
     void updateProblemNames(const QModelIndex& index);
 
 private:
-    QListView *listViewProblems;
+    QListWidget *listWidgetProblems;
     ProblemWidget *problemWidget;
 
     QSqlDatabase *db;
