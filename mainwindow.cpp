@@ -200,14 +200,10 @@ void MainWindow::reloadData()
 {
     QSqlQuery query("", *db);
     queryDebug(&query, "select name from problems");
-    //QStringList problemNames;
+
     listWidgetProblems->clear();
     while (query.next())
         listWidgetProblems->addItem(query.record().value(0).toString());
-
-    //QItemSelectionModel *sm = listWidgetProblems->selectionModel();
-    //listWidgetProblems->setModel(new QStringListModel(problemNames));
-    //delete sm;
 
     problemWidget->updateProblem();
 }
