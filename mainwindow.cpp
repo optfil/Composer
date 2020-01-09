@@ -114,19 +114,26 @@ void MainWindow::showContextMenu(const QPoint &pos)
 
 void MainWindow::newProblem()
 {
-    qDebug() << "newProblem";
-    QAbstractItemModel *m = listWidgetProblems->model();
-    if (m->insertRow(m->rowCount()))
-    {
-        qDebug() << "add row";
-        old_problem_name_ = "";  // MUST nullify old name
-        listWidgetProblems->edit(m->index(m->rowCount() - 1, 0));
-    }
+    disconnect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);  // needed not to trigger updateProblemNames too many times
+
+    old_problem_name_ = "";  // MUST nullify old name
+    QString new_name = tr("New task-%1");  // template name for new problems
+    int count = 1;
+    while (!listWidgetProblems->findItems(new_name.arg(count), Qt::MatchExactly).empty())
+        ++count;
+
+    listWidgetProblems->addItem(new_name.arg(count));
+
+    connect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);  // restore the connection
+    // the given disconnect-connect pair doesnot allow to trigger updateProblemNames
+
+    QListWidgetItem * item = listWidgetProblems->item(listWidgetProblems->model()->rowCount()-1);
+    item->setFlags(item->flags() | Qt::ItemIsEditable);  // trigger updateProblemNames one time
+    listWidgetProblems->editItem(item);
 }
 
 void MainWindow::renameProblem()
 {
-    qDebug() << "renameProblem";
     QList<QListWidgetItem*> selected = listWidgetProblems->selectedItems();
     if (selected.empty())  // cannot happen
         return;
@@ -137,13 +144,13 @@ void MainWindow::renameProblem()
 
 void MainWindow::deleteProblem()
 {
-    qDebug() << "deleteProblem";
     QList<QListWidgetItem*> selected = listWidgetProblems->selectedItems();
     if (selected.empty())  // cannot happen
         return;
 
     QString problem_name = selected[0]->data(Qt::DisplayRole).toString();
 
+    // ask for confirmation
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this,
                                   tr("Delete problem"),
@@ -164,7 +171,6 @@ void MainWindow::deleteProblem()
 
 void MainWindow::problemSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
-    qDebug() << "problemSelectionChanged";
     if (!deselected.indexes().empty())
     {
         QModelIndex previous = deselected.indexes()[0];
@@ -206,8 +212,7 @@ void MainWindow::problemSelectionChanged(const QItemSelection& selected, const Q
 
 void MainWindow::reloadData()
 {
-    qDebug() << "reloadData";
-    disconnect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);
+    disconnect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);  // needed not to trigger updateProblemNames too many times
 
     QSqlQuery query("", *db);
     queryDebug(&query, "select name from problems");
@@ -222,48 +227,25 @@ void MainWindow::reloadData()
 
     problemWidget->updateProblem();
 
-    connect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);
+    connect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);  // restore the connection
+    // the given disconnect-connect pair doesnot allow to trigger updateProblemNames
 }
 
 void MainWindow::updateProblemNames(QListWidgetItem *item)
 {
-    qDebug() << "updateProblemNames";
     QString new_name(item->data(Qt::DisplayRole).toString());
-
-    qDebug() << "old" << old_problem_name_;
-    qDebug() << "new" << new_name;
-
     if (old_problem_name_ == "")  // new problem
-    {/*
-        if (new_name == "")  // user error: empty name
-        {
-            qDebug() << "HERE!";
-            QMessageBox::critical(nullptr, tr("Cannot create problem"),
-                                  tr("Unable to create problem.\nProblem name must not be empty.").arg(new_name),
-                                  QMessageBox::Ok);
-            m->removeRow(index.row());
-        }
-        else if (m->match(index, Qt::DisplayRole, new_name, 2).size() > 1)  // name collision
-        {
-            QMessageBox::critical(nullptr, tr("Cannot create problem"),
-                                  tr("Unable to create problem.\nProblem with the name %1 already exists.").arg(new_name),
-                                  QMessageBox::Ok);
-            m->removeRow(index.row());
-        }
-        else  // create new problem
-        {
-            QSqlQuery query("", *db);
-            query.prepare(QString("insert into problems values(NULL, '%1', '%2', '%3')")
-                          .arg(new_name)
-                          .arg("")
-                          .arg(""));
-            queryDebug(&query);
+    {
+        QSqlQuery query("", *db);
+        query.prepare(QString("insert into problems values(NULL, '%1', '%2', '%3')")
+                      .arg(new_name)
+                      .arg("")
+                      .arg(""));
+        queryDebug(&query);
 
-            // move focus to newly created problem
-            listWidgetProblems->clearSelection();
-            listWidgetProblems->selectionModel()->select(index, QItemSelectionModel::Select);
-            listWidgetProblems->setCurrentIndex(index);
-        }*/
+        item->setSelected(true);
+        listWidgetProblems->setCurrentItem(item);
+        old_problem_name_ = new_name;
     }
     else  // rename
     {
@@ -272,14 +254,18 @@ void MainWindow::updateProblemNames(QListWidgetItem *item)
             QMessageBox::critical(nullptr, tr("Cannot rename problem"),
                                   tr("Unable to rename problem.\nProblem name must not be empty."),
                                   QMessageBox::Ok);
+            disconnect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);  // needed not to trigger updateProblemNames
             item->setData(Qt::DisplayRole, old_problem_name_);  // revert renaming
+            connect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);  // restore the connection
         }
         else if (listWidgetProblems->findItems(new_name, Qt::MatchExactly).size() > 1)  // user error: name collision
         {
             QMessageBox::critical(nullptr, tr("Cannot rename problem"),
                                   tr("Unable to rename problem.\nProblem with the name \"%1\" already exists.").arg(new_name),
                                   QMessageBox::Ok);
+            disconnect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);  // needed not to trigger updateProblemNames
             item->setData(Qt::DisplayRole, old_problem_name_);  // revert renaming
+            connect(listWidgetProblems, &QListWidget::itemChanged, this, &MainWindow::updateProblemNames);  // restore the connection
         }
         else
         {
