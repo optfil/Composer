@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QTextEdit>
 #include <QCheckBox>
+#include <QListView>
 
 class ProblemWidget : public QWidget
 {
@@ -14,8 +15,6 @@ public:
 signals:
 
 public slots:
-    void updateTask(const QString& task);
-    void updateSolution(const QString& solution);
     void updateProblem(const QString& task, const QString& solution);
     void updateProblem();
 
@@ -30,6 +29,10 @@ private:
     QCheckBox *checkBoxEditable;
     QTextEdit *textEditTask;
     QTextEdit *textEditSolution;
+    QListView *listViewTags;
+
+    void updateTask(const QString& task);
+    void updateSolution(const QString& solution);
 };
 
 #endif // PROBLEMWIDGET_H

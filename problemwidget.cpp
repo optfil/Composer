@@ -6,6 +6,7 @@ ProblemWidget::ProblemWidget(QWidget *parent) : QWidget(parent)
     checkBoxEditable = new QCheckBox(tr("Allow problem edit"));
     textEditTask = new QTextEdit;
     textEditSolution = new QTextEdit;
+    listViewTags = new QListView;
 
     textEditTask->setReadOnly(true);
     textEditSolution->setReadOnly(true);
@@ -14,6 +15,7 @@ ProblemWidget::ProblemWidget(QWidget *parent) : QWidget(parent)
     layoutMain->addWidget(checkBoxEditable);
     layoutMain->addWidget(textEditTask);
     layoutMain->addWidget(textEditSolution);
+    layoutMain->addWidget(listViewTags);
 
     connect(checkBoxEditable, &QCheckBox::toggled, this, &ProblemWidget::setReadOnly);
 
