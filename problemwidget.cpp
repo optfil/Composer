@@ -70,5 +70,8 @@ QString ProblemWidget::solution() const
 
 QList<QString> ProblemWidget::tags() const
 {
-    return {};
+    QList<QString> tags;
+    for (int row = 0; row < listWidgetTags->count(); ++row)
+        tags << listWidgetTags->item(row)->data(Qt::DisplayRole).toString();
+    return tags;
 }
