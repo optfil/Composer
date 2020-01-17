@@ -33,6 +33,26 @@ bool initDb(QSqlDatabase * db)
         queryDebug(&query, "insert into problems values(NULL, 'Вечный вопрос', 'Любит ли меня жена?', 'Чья?')");
     }
 
+    if (!db->tables().contains("tags"))
+    {
+        queryDebug(&query, "create table tags (id integer primary key autoincrement, name text)");
+        queryDebug(&query, "insert into tags values(NULL, 'Механика')");
+        queryDebug(&query, "insert into tags values(NULL, 'Постоянный ток')");
+        queryDebug(&query, "insert into tags values(NULL, 'Оптика')");
+        queryDebug(&query, "insert into tags values(NULL, '7 класс')");
+        queryDebug(&query, "insert into tags values(NULL, '8 класс')");
+    }
+
+    if (!db->tables().contains("problem-tag"))
+    {
+        queryDebug(&query, "create table problem-tag (id integer primary key autoincrement, problem-id integer, tag-id integer)");
+        queryDebug(&query, "insert into problem-tag values(NULL, 1, 1)");
+        queryDebug(&query, "insert into problem-tag values(NULL, 1, 4)");
+        queryDebug(&query, "insert into problem-tag values(NULL, 2, 1)");
+        queryDebug(&query, "insert into problem-tag values(NULL, 3, 2)");
+        queryDebug(&query, "insert into problem-tag values(NULL, 3, 5)");
+    }
+
     return true;
 }
 
