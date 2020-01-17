@@ -6,7 +6,7 @@ ProblemWidget::ProblemWidget(QWidget *parent) : QWidget(parent)
     checkBoxEditable = new QCheckBox(tr("Allow problem edit"));
     textEditTask = new QTextEdit;
     textEditSolution = new QTextEdit;
-    listViewTags = new QListView;
+    listWidgetTags = new QListWidget;
 
     textEditTask->setReadOnly(true);
     textEditSolution->setReadOnly(true);
@@ -15,7 +15,7 @@ ProblemWidget::ProblemWidget(QWidget *parent) : QWidget(parent)
     layoutMain->addWidget(checkBoxEditable);
     layoutMain->addWidget(textEditTask);
     layoutMain->addWidget(textEditSolution);
-    layoutMain->addWidget(listViewTags);
+    layoutMain->addWidget(listWidgetTags);
 
     connect(checkBoxEditable, &QCheckBox::toggled, this, &ProblemWidget::setReadOnly);
 
@@ -32,10 +32,18 @@ void ProblemWidget::updateSolution(const QString &solution)
     textEditSolution->setPlainText(solution);
 }
 
-void ProblemWidget::updateProblem(const QString &task, const QString &solution)
+void ProblemWidget::updateTags(const QList<QString> &tags)
+{
+    listWidgetTags->clear();
+    for (const auto& tag: tags)
+        listWidgetTags->addItem(tag);
+}
+
+void ProblemWidget::updateProblem(const QString &task, const QString &solution, const QList<QString>& tags)
 {
     updateTask(task);
     updateSolution(solution);
+    updateTags(tags);
 }
 
 void ProblemWidget::updateProblem()
@@ -58,4 +66,9 @@ QString ProblemWidget::task() const
 QString ProblemWidget::solution() const
 {
     return textEditSolution->toPlainText();
+}
+
+QList<QString> ProblemWidget::tags() const
+{
+    return {};
 }

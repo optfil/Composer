@@ -201,6 +201,7 @@ void MainWindow::problemSelectionChanged(const QItemSelection& selected, const Q
                           .arg(problemWidget->task())
                           .arg(problemWidget->solution())
                           .arg(previous.data().toString()));
+// update tags
             queryDebug(&query);
         }
     }
@@ -216,12 +217,17 @@ void MainWindow::problemSelectionChanged(const QItemSelection& selected, const Q
             queryDebug(&query);
 
             if (!query.next())  // cannot happened
-                problemWidget->updateProblem();
-            else
             {
-                QSqlRecord record = query.record();
-                problemWidget->updateProblem(record.value(0).toString(), record.value(1).toString());
+                problemWidget->updateProblem();
+                return;
             }
+            QSqlRecord record = query.record();
+            QString problem_name = record.value(0).toString();
+            QString problem_solution = record.value(1).toString();
+
+            QList<QString> tags{"tag-1", "tag-2"};
+
+            problemWidget->updateProblem(problem_name, problem_solution, tags);
         }
         else
             problemWidget->updateProblem();
