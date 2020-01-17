@@ -43,14 +43,14 @@ bool initDb(QSqlDatabase * db)
         queryDebug(&query, "insert into tags values(NULL, '8 класс')");
     }
 
-    if (!db->tables().contains("problem-tag"))
+    if (!db->tables().contains("problem_tag"))
     {
-        queryDebug(&query, "create table problem-tag (id integer primary key autoincrement, problem-id integer, tag-id integer)");
-        queryDebug(&query, "insert into problem-tag values(NULL, 1, 1)");
-        queryDebug(&query, "insert into problem-tag values(NULL, 1, 4)");
-        queryDebug(&query, "insert into problem-tag values(NULL, 2, 1)");
-        queryDebug(&query, "insert into problem-tag values(NULL, 3, 2)");
-        queryDebug(&query, "insert into problem-tag values(NULL, 3, 5)");
+        queryDebug(&query, "create table problem_tag (id integer primary key autoincrement, problem_id integer, tag_id integer)");
+        queryDebug(&query, "insert into problem_tag values(NULL, 1, 1)");
+        queryDebug(&query, "insert into problem_tag values(NULL, 1, 4)");
+        queryDebug(&query, "insert into problem_tag values(NULL, 2, 1)");
+        queryDebug(&query, "insert into problem_tag values(NULL, 3, 2)");
+        queryDebug(&query, "insert into problem_tag values(NULL, 3, 5)");
     }
 
     return true;
@@ -201,8 +201,8 @@ void MainWindow::problemSelectionChanged(const QItemSelection& selected, const Q
                           .arg(problemWidget->task())
                           .arg(problemWidget->solution())
                           .arg(previous.data().toString()));
-// update tags
             queryDebug(&query);
+// update tags
         }
     }
 
@@ -212,7 +212,7 @@ void MainWindow::problemSelectionChanged(const QItemSelection& selected, const Q
         if (current.isValid())  // may be redundant
         {
             QSqlQuery query("", *db);
-            query.prepare(QString("select task,solution from problems where name = '%1'")
+            query.prepare(QString("select id,task,solution from problems where name = '%1'")
                           .arg(current.data().toString()));
             queryDebug(&query);
 
@@ -222,10 +222,19 @@ void MainWindow::problemSelectionChanged(const QItemSelection& selected, const Q
                 return;
             }
             QSqlRecord record = query.record();
-            QString problem_name = record.value(0).toString();
-            QString problem_solution = record.value(1).toString();
+            int problem_id = record.value(0).toInt();
+            QString problem_name = record.value(1).toString();
+            QString problem_solution = record.value(2).toString();
 
-            QList<QString> tags{"tag-1", "tag-2"};
+            QList<QString> tags;
+            query.prepare(QString("select tags.name from tags join problem_tag on tags.id = problem_tag.tag_id where problem_tag.problem_id = %1")
+                          .arg(problem_id));
+            queryDebug(&query);
+            while (query.next())
+            {
+                QSqlRecord record = query.record();
+                tags << record.value(0).toString();
+            }
 
             problemWidget->updateProblem(problem_name, problem_solution, tags);
         }
