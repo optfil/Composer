@@ -34,8 +34,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(pushButtonRequest, &QPushButton::clicked, this, &MainWindow::request);
 
-//    mock_create_problems();
-
     statusBar();  // needed to create status bar
 
     QAction * actionQuit = new QAction(tr("&Quit"), this);
