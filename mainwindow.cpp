@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
     QMenu * menuFile = menuBar()->addMenu(tr("&File"));
     menuFile->addAction(actionQuit);
 
-/*    if (!QSqlDatabase::drivers().contains("QSQLITE"))
+    if (!QSqlDatabase::drivers().contains("QSQLITE"))
         QMessageBox::critical(
                     this,
                     "Unable to load database",
@@ -59,7 +59,6 @@ MainWindow::MainWindow(QWidget *parent)
     QStringList tables = db.tables();
     for (const auto& table: tables)
         textEditTables->append(table);
-*/
 /*
     QSqlQuery q;
     if (!q.exec(QLatin1String("create table books(id integer primary key, title varchar, author integer, genre integer, year integer, rating integer)")))
