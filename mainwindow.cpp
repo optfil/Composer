@@ -81,7 +81,8 @@ void MainWindow::request()
         for (int idx = 0; idx < record.count(); ++idx)
         {
             str.append(record.value(idx).toString());
-            str.append(idx == record.count() ? "\n" : " || ");
+            if (idx != record.count() - 1)
+                str.append(" || ");
         }
         textEditResponse->append(str);
     }
