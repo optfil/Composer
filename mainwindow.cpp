@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
+#include <QtSql/QSqlRecord>
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -103,9 +104,24 @@ MainWindow::~MainWindow()
 void MainWindow::request()
 {
     QSqlQuery q;
-
     if (!q.exec(lineEditQuery->text()))
+    {
         processError(q.lastError());
+        return;
+    }
+
+    textEditResponse->clear();
+    while (q.next())
+    {
+        QSqlRecord record = q.record();
+        QString str;
+        for (int idx = 0; idx < record.count(); ++idx)
+        {
+            str.append(record.value(idx).toString());
+            str.append(idx == record.count() ? '\n' : ' ');
+        }
+        textEditResponse->append(str);
+    }
 
     updateTables();
 }
