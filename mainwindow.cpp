@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlError>
+#include <QtSql/QSqlQuery>
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -54,11 +54,9 @@ MainWindow::MainWindow(QWidget *parent)
     db.setDatabaseName(":memory:");
 
     if (!db.open())
-        qDebug() << db.lastError();
+        processError(db.lastError());
 
-    QStringList tables = db.tables();
-    for (const auto& table: tables)
-        textEditTables->append(table);
+    updateTables();
 /*
     QSqlQuery q;
     if (!q.exec(QLatin1String("create table books(id integer primary key, title varchar, author integer, genre integer, year integer, rating integer)")))
@@ -104,8 +102,28 @@ MainWindow::~MainWindow()
 
 void MainWindow::request()
 {
+    QSqlQuery q;
 
+    if (!q.exec(lineEditQuery->text()))
+        processError(q.lastError());
+
+    updateTables();
 }
+
+void MainWindow::updateTables()
+{
+    textEditTables->clear();
+    QStringList tables = QSqlDatabase::database().tables();
+    for (const auto& table: tables)
+        textEditTables->append(table);
+}
+
+void MainWindow::processError(const QSqlError& error)
+{
+    textEditResponse->clear();
+    textEditResponse->append(error.text());
+}
+
 /*
 void MainWindow::mock_create_problems()
 {
