@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QLineEdit>
 #include <QTextEdit>
+#include <QPushButton>
 
 class MainWindow : public QMainWindow
 {
@@ -13,8 +14,13 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void request();
+
 private:
+    QTextEdit *textEditTables;
     QLineEdit *lineEditQuery;
+    QPushButton * pushButtonRequest;
     QTextEdit *textEditResponse;
 };
 
