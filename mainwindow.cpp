@@ -7,33 +7,21 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    mock_create_problems();
+    QWidget * centralWidget = new QWidget;
+    setCentralWidget(centralWidget);
 
-    QWidget * widgetCentral = new QWidget;
-    setCentralWidget(widgetCentral);
+    lineEditQuery = new QLineEdit;
+    textEditResponse = new QTextEdit;
 
-    problemWidget = new ProblemWidget;
-    listWidgetProblems = new QListWidget;
-    listWidgetProblems->setSelectionMode(QAbstractItemView::SingleSelection);
+    QVBoxLayout * layoutMain = new QVBoxLayout;
+    layoutMain->addWidget(lineEditQuery);
+    layoutMain->addWidget(textEditResponse);
 
+    centralWidget->setLayout(layoutMain);
 
-    QHBoxLayout * layoutMain = new QHBoxLayout;
-    layoutMain->addWidget(listWidgetProblems);
-    layoutMain->addWidget(problemWidget);
+//    mock_create_problems();
 
-    for (const auto &problem: problems){
-        QListWidgetItem * item = new QListWidgetItem;
-        item->setData(Qt::UserRole, QVariant::fromValue(problem));
-        item->setText(problem.name());
-        listWidgetProblems->addItem(item);
-    }
-
-    widgetCentral->setLayout(layoutMain);    
     statusBar();  // needed to create status bar
-//    statusBar()->showMessage("message here");
-//    setWindowTitle("Composer 0.1");
-//    setMinimumSize(300, 300);
-//    resize(480, 320);
 
     QAction * actionQuit = new QAction(tr("&Quit"), this);
 //    actionQuit->setShortcuts(QKeySequence::New);
@@ -41,69 +29,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(actionQuit, &QAction::triggered, this, &MainWindow::close);
     QMenu * menuFile = menuBar()->addMenu(tr("&File"));
     menuFile->addAction(actionQuit);
-
-    listWidgetProblems->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(listWidgetProblems, &QListWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
-    connect(listWidgetProblems, &QListWidget::itemSelectionChanged, this, &MainWindow::problemSelectionChanged);
 }
 
 MainWindow::~MainWindow()
 {
 }
-
-void MainWindow::showContextMenu(const QPoint &pos)
-{
-    QPoint globalPos = listWidgetProblems->mapToGlobal(pos);
-    QListWidgetItem * item = listWidgetProblems->itemAt(pos);
-
-    QMenu menu;
-    menu.addAction("New", this, &MainWindow::newItem);
-    menu.addAction("Rename", this, &MainWindow::renameItem)->setEnabled(static_cast<bool>(item));
-    menu.addAction("Delete", this, &MainWindow::deleteItem)->setEnabled(static_cast<bool>(item));
-
-    menu.exec(globalPos);
-}
-
-void MainWindow::newItem()
-{
-
-}
-
-void MainWindow::renameItem()
-{
-    QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
-    if (!selectedItems.empty())
-    {
-        QListWidgetItem *item = selectedItems.first();
-        item->setFlags(item->flags() | Qt::ItemIsEditable);
-        listWidgetProblems->editItem(item);
-    }
-}
-
-void MainWindow::deleteItem()
-{
-    QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
-    if (!selectedItems.empty())
-    {
-        QListWidgetItem * item = listWidgetProblems->takeItem(listWidgetProblems->currentRow());
-        delete item;
-    }
-}
-
-void MainWindow::problemSelectionChanged()
-{
-    QList<QListWidgetItem*> selectedItems = listWidgetProblems->selectedItems();
-    if (!selectedItems.empty())
-    {
-        QListWidgetItem * item = selectedItems.first();
-        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-        const Problem & problem = item->data(Qt::UserRole).value<Problem>();
-        problemWidget->updateProblem(problem);
-    }
-    else
-        problemWidget->updateProblem();
-}
-
+/*
 void MainWindow::mock_create_problems()
 {
     problems.append(Problem("Задача про колесо"));
@@ -122,3 +53,4 @@ void MainWindow::mock_create_problems()
     problems.last().setTask("Любит ли меня жена?");
     problems.last().setSolution("Чья?");
 }
+*/
