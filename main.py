@@ -1,6 +1,7 @@
 import pathlib
 import sqlite3
 from dataclasses import dataclass
+import PyQt5
 
 db_file_name = 'tasks.db'  # ':memory:' for in-memory db
 reset_sql_script = 'create_demo_table.sql'
@@ -56,26 +57,18 @@ class DBManager:
         self.cursor.execute('''SELECT name FROM PRAGMA_TABLE_INFO(?);''', (table_name,))
         return [p[0] for p in self.cursor.fetchall()]
 
-    def tags(self, task_id):
-        pass
-
     def task_tags(self, task):
         self.cursor.execute(f'''SELECT tags.name FROM {self.tasks_name} as tasks \
-                                    LEFT JOIN {self.task_tag_name} as task_tag 
+                                    INNER JOIN {self.task_tag_name} as task_tag 
                                     ON tasks.id == task_tag.task_id
-                                    LEFT JOIN {self.tags_name} as tags
+                                    INNER JOIN {self.tags_name} as tags
                                     ON task_tag.tag_id == tags.id
                                     WHERE tasks.id == {task.id};''')
-        return [p[0] for p in self.cursor.fetchall()]
+        res = self.cursor.fetchall()
+        return [p[0] for p in res]
 
 
 if __name__ == '__main__':
     with DBManager(db_file_name, reset_script=reset_sql_script) as dbm:
-        tables = dbm.tables()
-        for table in tables:
-            print(table)
-            print(dbm.columns(table))
-        print(dbm.tags)
-        print(dbm.tasks)
-        
-        print(dbm.task_tags(dbm.tags[0]))
+        for task in dbm.tasks:
+            print(task.name, task.text, dbm.task_tags(task))
