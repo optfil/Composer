@@ -1,7 +1,9 @@
+import sys
 import pathlib
 import sqlite3
 from dataclasses import dataclass
-import PyQt5
+from PyQt5.QtSql import QSqlDatabase, QSqlQuery
+from PyQt5.QtWidgets import QApplication, QMessageBox, QLabel
 
 db_file_name = 'tasks.db'  # ':memory:' for in-memory db
 reset_sql_script = 'create_demo_table.sql'
@@ -69,6 +71,27 @@ class DBManager:
 
 
 if __name__ == '__main__':
-    with DBManager(db_file_name, reset_script=reset_sql_script) as dbm:
-        for task in dbm.tasks:
-            print(task.name, task.text, dbm.task_tags(task))
+    app = QApplication(sys.argv)
+    
+    con = QSqlDatabase.addDatabase("QSQLITE")
+    con.setDatabaseName(db_file_name)
+    
+    if not con.open():
+        QMessageBox.critical(
+            None,
+            "Demo - Error!",
+            "Database Error: %s" % con.lastError().databaseText(),
+        )
+        sys.exit(1)
+    
+    win = QLabel("Connection Successfully Opened!")
+    win.setWindowTitle("App Name")
+    win.resize(200, 100)
+    win.show()
+    
+    q = QSqlQuery()
+    q.exec('SELECT * FROM tasks;')
+    
+    sys.exit(app.exec_())
+    
+    
